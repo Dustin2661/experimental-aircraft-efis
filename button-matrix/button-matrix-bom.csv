@@ -6,9 +6,8 @@ R1-R20,20,470 ohm resistor 1/4 W,Generic axial resistor,One in series with each 
 U1,1,24-channel 12-bit LED driver,Texas Instruments TLC5947,Use a package compatible with the released PCB footprint
 R21,1,10 kohm resistor,Generic axial resistor,LED driver IREF setting; verify current-setting calculation for selected driver/package
 R22-R26,5,10 kohm resistor 1/4 W,Generic axial resistor,Column pull-ups to +3V3
-C1,1,10 uF capacitor 10 V minimum,Generic,Supply bulk filtering; observe polarity if electrolytic
+C1,1,10 uF capacitor 50 V,Generic,Supply bulk filtering; observe polarity if electrolytic
 C2-C3,2,100 nF ceramic capacitor 50 V,Generic,Logic and 5 V rail bypassing near loads
 J1,1,2x10 keyed right-angle IDC header 2.54 mm,Generic shrouded header,20-position body with pin 20 omitted for key; pin 8 is +5V
 H1-H4,4,M3 x 8 mm screw and nut,Generic,Panel mounting hardware; confirm panel thickness
 PCB,1,120 x 90 mm two-layer FR-4,Generic,1.6 mm nominal thickness; final fabrication stack-up must be approved
-

@@ -13,6 +13,18 @@ a different two-row layout and 14-pad connector; no reference image or Gerber
 was present in this repository, so the board does not claim to reproduce that
 copper artwork.
 
+The KiCad files are review aids only: the schematic is a design-note sheet and
+the PCB file is a placement/mechanical mockup. They do not yet contain
+component footprints, connected nets, copper routing, or verified
+manufacturing outputs. Do not send these files to a PCB fabricator.
+
+The requested 100 nF capacitors across every switch are intentionally not
+used. In this diode-isolated matrix, per-switch capacitors can couple row and
+column transitions; input debouncing is instead performed in firmware for
+20 ms. C2/C3 are rail bypass capacitors. The function-to-CAN table is proposed
+integration metadata; the Teensy firmware reports button IDs over USB serial
+and does not transmit CAN or actuate autopilot functions.
+
 ## Placement and assembly
 
 The mechanical drawing shows the 120 x 90 mm board outline, four M3 mounting
