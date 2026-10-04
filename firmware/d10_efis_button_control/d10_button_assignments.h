@@ -1,0 +1,35 @@
+#pragma once
+
+#include <Arduino.h>
+
+enum ButtonId : uint8_t {
+  BTN_LIDAR,
+  BTN_AUTOPILOT,
+  BTN_EMERG_COM,
+  BTN_CM5_BOOT,
+  BTN_MAP,
+  BTN_COM_EDIT,
+  BTN_NAV_EDIT,
+  BTN_ENGINE_MON,
+  BTN_TRAFFIC,
+  BTN_PFD,
+  BTN_DIRECT_TO,
+  BTN_FLIGHT_PLAN,
+  BTN_AIRPORT,
+  BTN_COM_SWAP,
+  BTN_NAV_SWAP,
+  BTN_XPDR,
+  BTN_BARO,
+  BTN_ALERT_ACK,
+  BTN_BACK,
+  BTN_MENU_DIM,
+  TOTAL_BUTTONS
+};
+
+const char* const button_labels[TOTAL_BUTTONS] = {
+  "LIDAR", "AUTOPILOT", "EMERG COM", "CM5 BOOT",
+  "MAP", "COM EDIT", "NAV EDIT", "ENGINE MON",
+  "TRAFFIC", "PFD", "DIRECT TO", "FLIGHT PLAN",
+  "AIRPORT", "COM SWAP", "NAV SWAP", "XPDR",
+  "BARO", "ALERT ACK", "BACK", "MENU/DIM"
+};
