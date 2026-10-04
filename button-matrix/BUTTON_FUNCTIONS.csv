@@ -1,0 +1,21 @@
+Button,Function,LED color (proposed),CAN message
+1,AP Engage,Green,0x501
+2,AP Disconnect,Red,0x502
+3,Autopilot Mode (Heading),Amber,0x503
+4,Autopilot Mode (Alt Hold),Amber,0x504
+5,Autopilot Mode (Approach),Amber,0x505
+6,Navigation Source Select,Green,0x506
+7,Display Brightness +,None,0x507
+8,Display Brightness -,None,0x508
+9,PFD / MFD Toggle,Blue,0x509
+10,Trim Pitch Up,None,0x50A
+11,Trim Pitch Down,None,0x50B
+12,Trim Roll Left,None,0x50C
+13,Trim Roll Right,None,0x50D
+14,LiDAR Enable/Disable,Green/Red,0x50E
+15,System Menu,Amber,0x50F
+16,Menu Up,None,0x510
+17,Menu Down,None,0x511
+18,Menu Select,Green,0x512
+19,Emergency / Standby,Red,0x513
+20,Reserved / Custom,None,0x514
