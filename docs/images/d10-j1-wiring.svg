@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="660" viewBox="0 0 1000 660">
+  <rect width="1000" height="660" fill="#fff"/>
+  <g font-family="sans-serif" fill="#172b40">
+    <text x="30" y="40" font-size="24">D10 R3: rear J1 positions and proposed Teensy wiring</text>
+    <text x="30" y="72" font-size="16">Supplied pinout, not independently verified. Power OFF: verify continuity first.</text>
+    <text x="30" y="111" font-size="18">Rear view, J1 on RIGHT; pin 1 lower-right. Positions ≠ fitted connector pin count.</text>
+    <g font-size="16" text-anchor="middle">
+      <g fill="#f0f5fa" stroke="#172b40">
+        <rect x="35" y="130" width="110" height="58" stroke-dasharray="5 5"/>
+        <rect x="160" y="130" width="110" height="58"/>
+        <rect x="285" y="130" width="110" height="58"/>
+        <rect x="410" y="130" width="110" height="58"/>
+        <rect x="535" y="130" width="110" height="58"/>
+        <rect x="660" y="130" width="110" height="58"/>
+        <rect x="785" y="130" width="110" height="58"/>
+        <rect x="35" y="203" width="110" height="58" stroke-dasharray="5 5"/>
+        <rect x="160" y="203" width="110" height="58" stroke-dasharray="5 5"/>
+        <rect x="285" y="203" width="110" height="58"/>
+        <rect x="410" y="203" width="110" height="58"/>
+        <rect x="535" y="203" width="110" height="58"/>
+        <rect x="660" y="203" width="110" height="58"/>
+        <rect x="785" y="203" width="110" height="58"/>
+      </g>
+      <text x="90" y="153">14</text><text x="90" y="176">NO PAD</text>
+      <text x="215" y="153">12</text><text x="215" y="176">ROW2</text>
+      <text x="340" y="153">10</text><text x="340" y="176">ROW1</text>
+      <text x="465" y="153">8</text><text x="465" y="176">LED +5 V</text>
+      <text x="590" y="153">6</text><text x="590" y="176">GND</text>
+      <text x="715" y="153">4</text><text x="715" y="176">ROW4</text>
+      <text x="840" y="153">2</text><text x="840" y="176">ROW3</text>
+      <text x="90" y="226">13</text><text x="90" y="249">NO PAD</text>
+      <text x="215" y="226">11</text><text x="215" y="249">NO PAD</text>
+      <text x="340" y="226">9</text><text x="340" y="249">ROW0</text>
+      <text x="465" y="226">7</text><text x="465" y="249">COL3</text>
+      <text x="590" y="226">5</text><text x="590" y="249">COL2</text>
+      <text x="715" y="226">3</text><text x="715" y="249">COL1</text>
+      <text x="840" y="226">1</text><text x="840" y="249">COL0</text>
+    </g>
+    <text x="30" y="307" font-size="20">J1 signal → Teensy GPIO (not physical header position)</text>
+    <g font-family="monospace" font-size="19">
+      <text x="40" y="345">9  ROW0 ─────────────→ 0</text>
+      <text x="40" y="379">10 ROW1 ─────────────→ 1</text>
+      <text x="40" y="413">12 ROW2 ─────────────→ 2</text>
+      <text x="40" y="447">2  ROW3 ─────────────→ 3</text>
+      <text x="40" y="481">4  ROW4 ─────────────→ 4</text>
+      <text x="530" y="345">1 COL0 ──────────────→ 5</text>
+      <text x="530" y="379">3 COL1 ──────────────→ 6</text>
+      <text x="530" y="413">5 COL2 ──────────────→ 7</text>
+      <text x="530" y="447">7 COL3 ──────────────→ 8</text>
+      <text x="530" y="481">6 GND  ──────────────→ GND</text>
+    </g>
+    <text x="30" y="533" font-size="18">J1-8 ← switched, current-limited +5 V from LED driver (separate diagram).</text>
+    <text x="30" y="565" font-size="18">GPIO 9 → driver input ONLY. Never connect J1-8 to a Teensy GPIO.</text>
+    <text x="30" y="607" font-size="16">ROW1 / ROW2 discrepancy reported in KiCad source: verify J1-10 and J1-12 on your PCB.</text>
+    <text x="30" y="633" font-size="16">SW1–SW20 map electrically in groups of four; this is not their physical front layout.</text>
+  </g>
+</svg>
