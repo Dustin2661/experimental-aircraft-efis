@@ -1,0 +1,54 @@
+20-button board interface, revision 1
+
+Board
+  Matrix: 4 rows x 5 columns, buttons numbered 1..20, left-to-right then
+  top-to-bottom. The 20-position D10 reference drawing is not available here;
+  its two-row/14-pad connector cannot be assumed to match this 20-button design.
+  J1 is a keyed 2x10 (20-position) right-angle IDC header. Pin 20 is omitted
+  for the key.
+
+J1 pinout (board view; even pins are the second IDC row)
+  1  ROW0       2  +5V_LED
+  3  ROW1       4  +5V_LED
+  5  ROW2       6  GND
+  7  ROW3       8  +5V_LED
+  9  COL0      10  GND
+ 11  COL1      12  COL2
+ 13  COL3      14  +3V3
+ 15  COL4      16  LED_SIN
+ 17  LED_SCLK  18  LED_XLAT
+ 19  NC        20  KEY (no pin / no copper)
+
+The board's LED driver is a TLC5947, powered from +3V3 and controlled by
+SIN/SCLK/XLAT. Its open-drain constant-current outputs sink the 20 LED
+cathodes; each LED anode is fed from +5V through its own 470 ohm resistor.
+The driver IC, not 20 Teensy PWM pins, generates independent LED brightness.
+The driver's BLANK, DCPRG and VPRG pins are hard-strapped for normal operation
+per the selected TLC5947 datasheet circuit. Verify these straps against the
+exact package before fabrication.
+
+Teensy 4.1 pin assignments
+  ROW0..ROW3: pins 0, 1, 2, 3
+  ROW4:       pin 4
+  COL0..COL4: pins 5, 6, 7, 8, 9 (INPUT_PULLUP)
+  LED_SIN:    pin 11
+  LED_SCLK:   pin 13
+  LED_XLAT:   pin 10
+
+All Teensy pins are 3.3 V only. Do not connect the +5V_LED supply to any
+Teensy GPIO. J1 pin 14 supplies 3.3 V to the board's low-current logic only;
+the 20 LED current comes from +5V_LED. Confirm the host's 3.3 V budget and
+common-ground arrangement before connecting the board.
+
+Matrix polarity
+  One 1N4148 is in series with each switch, anode at its column and cathode at
+  its row. The selected row is driven LOW and the other rows HIGH. A pressed
+  switch therefore reads LOW at its column. Do not omit the diodes: they
+  prevent multi-key ghosting.
+
+Connector power notes
+  Pins 2, 4 and 8 are +5V_LED; pins 6 and 10 are GND. Pin 8 is +5 V, matching
+  the reference image's stated backlight pin. No 1 A load is expected: 20
+  nominal 5 mA LEDs draw about 100 mA total. Protect and size the host supply
+  for the measured board load; the 1 A value is a supply capacity, not a
+  required current.
