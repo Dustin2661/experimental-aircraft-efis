@@ -365,7 +365,7 @@ motion.addEventListener('click', () => {
 document.querySelector('#fullscreen').addEventListener('click', async () => {
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
-    else await document.querySelector('.flight-display').requestFullscreen();
+    else await document.querySelector('main').requestFullscreen();
   } catch {
     status.textContent = 'FULL SCREEN UNAVAILABLE';
   }
