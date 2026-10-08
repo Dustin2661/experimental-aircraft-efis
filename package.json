@@ -1,0 +1,12 @@
+{
+  "name": "experimental-aircraft-efis",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CM5 synthetic-vision layout demonstrator",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "check": "node --check server.js && node --check public/flight.js && node --check public/display.js"
+  }
+}

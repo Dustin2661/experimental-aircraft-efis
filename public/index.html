@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#123658">
+    <title>Experimental Aircraft · Synthetic Vision Demo</title>
+    <link rel="stylesheet" href="/display.css">
+    <script type="module" src="/display.js"></script>
+  </head>
+  <body>
+    <main aria-label="Experimental aircraft EFIS layout demonstration">
+      <div class="flight-display">
+        <canvas id="vision" aria-label="Synthetic terrain with attitude, groundspeed, GPS altitude, and heading overlays"></canvas>
+        <header class="status-bar">
+          <div><span>DESTINATION</span><strong>KSNY <b>↘ 34°</b></strong></div>
+          <div><span>DISTANCE</span><strong>19 NM</strong></div>
+          <div><span>ETE</span><strong>8m 02s</strong></div>
+        </header>
+        <div class="safety-label">SIMULATED TERRAIN · NOT FOR NAVIGATION</div>
+        <div id="source-status" class="source-status" role="status">DEMO DATA</div>
+        <div id="annunciation" class="annunciation" role="alert" hidden>FLIGHT DATA STALE</div>
+        <div class="controls">
+          <button id="motion" type="button" aria-pressed="false">Animate demo</button>
+          <button id="fullscreen" type="button">Full screen</button>
+        </div>
+      </div>
+      <p class="screen-reader-only">Visual layout prototype only. Terrain and navigation information are fictitious.
+        Do not use for flight or as a primary attitude instrument.</p>
+    </main>
+  </body>
+</html>
