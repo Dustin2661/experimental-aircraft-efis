@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EFIS Synthetic Vision</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      background: #111820;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: grid;
+      min-height: 100vh;
+      margin: 0;
+      place-items: center;
+      padding: 18px;
+    }
+
+    main {
+      width: min(100%, 1200px);
+      overflow: hidden;
+      border: 1px solid #65717b;
+      border-radius: 12px;
+      background: #071526;
+      box-shadow: 0 18px 70px #0009;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 1000 / 620;
+      touch-action: manipulation;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 0;
+      }
+
+      main {
+        border: 0;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main aria-label="Synthetic vision primary flight display">
+    <canvas id="display" role="img" aria-label="Synthetic vision with attitude, airspeed, altitude, and heading"></canvas>
+  </main>
+  <script>
+    (() => {
+      "use strict";
+
+      const WIDTH = 1000;
+      const HEIGHT = 620;
+      const canvas = document.getElementById("display");
+      const context = canvas.getContext("2d");
+      const state = {
+        pitch: 0,
+        roll: 0,
+        airspeed: 142,
+        altitude: 10130,
+        heading: 284,
+        track: 278,
+        verticalSpeed: 0,
+        groundSpeed: 65,
+        gpsAltitude: 10100,
+        waypoint: "KSNY",
+        distance: 34,
+        crossTrack: 0.2,
+        time: "3:23 PM"
+      };
+
+      function resize() {
+        const bounds = canvas.getBoundingClientRect();
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(bounds.width * pixelRatio);
+        canvas.height = Math.round(bounds.height * pixelRatio);
+        context.setTransform(canvas.width / WIDTH, 0, 0, canvas.height / HEIGHT, 0, 0);
+        draw();
+      }
+
+      function text(value, x, y, size = 14, color = "#fff", align = "center", weight = 500) {
+        context.fillStyle = color;
+        context.font = `${weight} ${size}px "Segoe UI", Arial, sans-serif`;
+        context.textAlign = align;
+        context.textBaseline = "middle";
+        context.fillText(String(value), x, y);
+      }
+
+      function line(x1, y1, x2, y2, color = "#fff", width = 1, alpha = 1) {
+        context.save();
+        context.globalAlpha = alpha;
+        context.strokeStyle = color;
+        context.lineWidth = width;
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.stroke();
+        context.restore();
+      }
+
+      function polygon(points, fill) {
+        context.fillStyle = fill;
+        context.beginPath();
+        context.moveTo(points[0][0], points[0][1]);
+        for (let index = 1; index < points.length; index += 1) {
+          context.lineTo(points[index][0], points[index][1]);
+        }
+        context.closePath();
+        context.fill();
+      }
+
+      function terrainRidge(base, amplitude, phase, color, frequency, horizon) {
+        context.beginPath();
+        context.moveTo(-30, HEIGHT + 10);
+        for (let x = -30; x <= WIDTH + 30; x += 10) {
+          const ridgeY = horizon + base
+            + Math.sin(x * frequency + phase) * amplitude
+            + Math.sin(x * frequency * 2.17 + phase * 0.7) * amplitude * 0.36
+            + Math.cos(x * frequency * 0.53 + phase) * amplitude * 0.26;
+          context.lineTo(x, ridgeY);
+        }
+        context.lineTo(WIDTH + 30, HEIGHT + 10);
+        context.closePath();
+        context.fillStyle = color;
+        context.fill();
+      }
+
+      function terrainContours(horizon, pitchOffset) {
+        context.save();
+        context.globalAlpha = 0.26;
+        context.lineWidth = 1;
+        for (let row = 0; row < 10; row += 1) {
+          context.beginPath();
+          for (let x = 0; x <= WIDTH; x += 8) {
+            const y = horizon + 68 + row * 31 + pitchOffset
+              + Math.sin(x * 0.018 + row * 0.7) * (9 + row * 1.2)
+              + Math.sin(x * 0.043 - row) * 5;
+            if (x === 0) context.moveTo(x, y);
+            else context.lineTo(x, y);
+          }
+          context.strokeStyle = row % 2 ? "#e7ed6c" : "#123d22";
+          context.stroke();
+        }
+        context.restore();
+      }
+
+      function drawWorld() {
+        const horizon = 300 + state.pitch * 5.2;
+        const gradient = context.createLinearGradient(0, 0, 0, HEIGHT);
+        gradient.addColorStop(0, "#1a4e82");
+        gradient.addColorStop(0.58, "#4f91bd");
+        gradient.addColorStop(1, "#afc7c4");
+
+        context.save();
+        context.translate(WIDTH / 2, HEIGHT / 2);
+        context.rotate(-state.roll * Math.PI / 180);
+        context.translate(-WIDTH / 2, -HEIGHT / 2);
+        context.fillStyle = gradient;
+        context.fillRect(-500, -500, WIDTH + 1000, HEIGHT + 1000);
+
+        const worldHorizon = horizon - HEIGHT / 2 + HEIGHT / 2;
+        const ground = context.createLinearGradient(0, worldHorizon, 0, HEIGHT);
+        ground.addColorStop(0, "#88753b");
+        ground.addColorStop(0.12, "#6e8135");
+        ground.addColorStop(0.55, "#57732c");
+        ground.addColorStop(1, "#324d2a");
+        context.fillStyle = ground;
+        context.fillRect(-500, worldHorizon, WIDTH + 1000, HEIGHT + 700);
+
+        terrainRidge(-8, 13, 2, "#9d1d20", 0.027, worldHorizon);
+        terrainRidge(13, 11, 5, "#d1372e", 0.019, worldHorizon);
+        terrainRidge(37, 16, 8, "#75812c", 0.012, worldHorizon);
+        terrainRidge(63, 19, 1, "#617c2d", 0.009, worldHorizon);
+        terrainContours(worldHorizon, state.pitch * 7);
+
+        const glow = context.createRadialGradient(780, worldHorizon + 90, 5, 780, worldHorizon + 90, 260);
+        glow.addColorStop(0, "#d4cb41aa");
+        glow.addColorStop(1, "#d4cb4100");
+        context.fillStyle = glow;
+        context.fillRect(500, worldHorizon, 500, HEIGHT);
+        context.restore();
+
+        line(0, horizon, WIDTH, horizon, "#fff4ca", 2, 0.92);
+      }
+
+      function drawTopBar() {
+        context.fillStyle = "#061329b8";
+        context.fillRect(0, 0, WIDTH, 53);
+        line(0, 53, WIDTH, 53, "#a5c9ed", 1, 0.36);
+        text("iPad ▾", 14, 17, 10, "#d7e4f2", "left");
+        text(state.time, WIDTH / 2, 17, 10, "#eaf3fc");
+        text("100% ▰", WIDTH - 15, 17, 10, "#d7e4f2", "right");
+        text("DTK", 258, 32, 9, "#e677db");
+        text(`${state.track}°`, 258, 44, 13, "#ef65e5");
+        text("ACTIVE LEG", 500, 32, 9, "#e677db");
+        text(`${state.waypoint}  →  ${state.distance}NM`, 500, 44, 13, "#ef65e5");
+        text("ETE", 743, 32, 9, "#e677db");
+        text("2m21s", 743, 44, 13, "#ef65e5");
+        polygon([[494, 60], [506, 60], [500, 67]], "#f7f6ec");
+      }
+
+      function drawPitchLadder() {
+        const centerX = WIDTH / 2;
+        const centerY = 300 + state.pitch * 5.2;
+        context.save();
+        context.translate(centerX, centerY);
+        context.rotate(-state.roll * Math.PI / 180);
+        for (let pitch = -30; pitch <= 30; pitch += 5) {
+          if (pitch === 0) continue;
+          const y = -pitch * 5.2;
+          const major = pitch % 10 === 0;
+          const halfWidth = major ? 30 : 16;
+          line(-halfWidth, y, -7, y, "#fff", major ? 1.5 : 1, 0.9);
+          line(7, y, halfWidth, y, "#fff", major ? 1.5 : 1, 0.9);
+          if (major) {
+            text(Math.abs(pitch), -halfWidth - 15, y, 11, "#fff");
+            text(Math.abs(pitch), halfWidth + 15, y, 11, "#fff");
+          }
+        }
+        context.restore();
+
+        line(centerX - 42, 300, centerX - 12, 300, "#fff", 2);
+        line(centerX + 12, 300, centerX + 42, 300, "#fff", 2);
+        polygon([[centerX, 293], [centerX - 7, 283], [centerX + 7, 283]], "#fff");
+      }
+
+      function drawTape(x, value, title, side) {
+        const top = 112;
+        const height = 206;
+        const step = title === "ALT" ? 100 : 10;
+        const baseValue = Math.floor(value / step) * step;
+        const offset = (value - baseValue) / step * 20.6;
+        const left = side === "left" ? x : x - 66;
+        const right = left + 66;
+
+        context.fillStyle = "#06182bb0";
+        context.fillRect(left, top, 66, height);
+        text(title, (left + right) / 2, top - 14, 9, "#ecf4fb");
+        for (let index = -5; index <= 5; index += 1) {
+          const y = top + height / 2 + index * 20.6 - offset;
+          const tickValue = baseValue - index * step;
+          if (y < top + 6 || y > top + height - 6) continue;
+          line(side === "left" ? right - 8 : left, y, side === "left" ? right : left + 8, y, "#fff", 1, 0.8);
+          text(tickValue, side === "left" ? left + 26 : right - 26, y, 12, "#fff");
+        }
+
+        const boxWidth = 53;
+        const boxX = side === "left" ? left - 1 : right - boxWidth + 1;
+        context.fillStyle = "#10151b";
+        context.fillRect(boxX, HEIGHT / 2 - 16, boxWidth, 32);
+        context.strokeStyle = "#fff";
+        context.lineWidth = 1.5;
+        context.strokeRect(boxX, HEIGHT / 2 - 16, boxWidth, 32);
+        text(title === "ALT" ? Math.round(value) : Math.round(value), boxX + boxWidth / 2, HEIGHT / 2, 17, "#fff", "center", 700);
+        const trendX = side === "left" ? right + 10 : left - 10;
+        line(trendX, HEIGHT / 2 - 17, trendX, HEIGHT / 2 + 17, "#fff", 1, 0.8);
+      }
+
+      function drawHeadingArc() {
+        const centerX = WIDTH / 2;
+        const centerY = 181;
+        const radiusX = 106;
+        const radiusY = 82;
+        context.save();
+        context.strokeStyle = "#fff";
+        context.lineWidth = 1.5;
+        context.beginPath();
+        context.ellipse(centerX, centerY, radiusX, radiusY, 0, Math.PI * 1.18, Math.PI * 1.82);
+        context.stroke();
+        for (let offset = -60; offset <= 60; offset += 10) {
+          const angle = (-90 + offset) * Math.PI / 180;
+          const x1 = centerX + Math.cos(angle) * radiusX;
+          const y1 = centerY + Math.sin(angle) * radiusY;
+          const x2 = centerX + Math.cos(angle) * (radiusX - (offset % 30 === 0 ? 9 : 5));
+          const y2 = centerY + Math.sin(angle) * (radiusY - (offset % 30 === 0 ? 9 : 5));
+          line(x1, y1, x2, y2, "#fff", 1, 0.9);
+          if (offset % 30 === 0) {
+            text(((state.heading + offset + 360) % 360).toString().padStart(3, "0"),
+              centerX + Math.cos(angle) * 70,
+              centerY + Math.sin(angle) * 57, 10, "#fff");
+          }
+        }
+        polygon([[centerX, 98], [centerX - 5, 108], [centerX + 5, 108]], "#fff");
+        context.restore();
+      }
+
+      function drawCompass() {
+        const x = 500;
+        const y = 505;
+        const radius = 86;
+        context.save();
+        context.strokeStyle = "#fff";
+        context.lineWidth = 1;
+        context.globalAlpha = 0.76;
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.stroke();
+        for (let degree = 0; degree < 360; degree += 15) {
+          const angle = (degree - state.heading - 90) * Math.PI / 180;
+          const inner = radius - (degree % 45 === 0 ? 11 : 6);
+          line(x + Math.cos(angle) * inner, y + Math.sin(angle) * inner,
+            x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, "#fff", 1, 0.86);
+          if (degree % 45 === 0) {
+            const labels = { 0: "N", 45: "NE", 90: "E", 135: "SE", 180: "S", 225: "SW", 270: "W", 315: "NW" };
+            text(labels[degree], x + Math.cos(angle) * (radius - 22),
+              y + Math.sin(angle) * (radius - 22), 10, "#fff");
+          }
+        }
+        context.restore();
+        context.strokeStyle = "#fff";
+        context.lineWidth = 1.4;
+        context.beginPath();
+        context.moveTo(x, y - radius - 10);
+        context.lineTo(x - 6, y - radius + 3);
+        context.lineTo(x + 6, y - radius + 3);
+        context.closePath();
+        context.stroke();
+        text(`TRK ${Math.round(state.track)}°`, x, y - 43, 12, "#fff");
+        text(`${state.crossTrack.toFixed(1)} NM`, x, y + 43, 10, "#fff");
+
+        context.save();
+        context.translate(x + state.crossTrack * 13, y - 8);
+        context.rotate(-0.36);
+        line(0, 12, 0, -72, "#e84ad5", 3);
+        polygon([[-5, -65], [0, -78], [5, -65]], "#e84ad5");
+        context.restore();
+        line(x - 11, y, x - 3, y, "#fff", 2);
+        line(x + 3, y, x + 11, y, "#fff", 2);
+        line(x, y - 8, x, y + 8, "#fff", 2);
+      }
+
+      function draw() {
+        if (!context || canvas.width === 0 || canvas.height === 0) return;
+        context.clearRect(0, 0, WIDTH, HEIGHT);
+        drawWorld();
+        drawHeadingArc();
+        drawPitchLadder();
+        drawTape(240, state.airspeed, "IAS", "left");
+        drawTape(760, state.altitude, "ALT", "right");
+        text(`${Math.round(state.groundSpeed)} KTS`, 240, 335, 10, "#fff");
+        text("GPS ALT", 760, 335, 9, "#fff");
+        text(Math.round(state.gpsAltitude), 760, 350, 10, "#fff");
+        drawCompass();
+        drawTopBar();
+        text(`${Math.round(state.verticalSpeed)} FT/MIN`, 500, 584, 11, "#fff");
+      }
+
+      window.updateSyntheticVision = (updates) => {
+        if (!updates || typeof updates !== "object") return;
+        const bounded = { pitch: [-45, 45], roll: [-90, 90], airspeed: [0, 400],
+          altitude: [-1000, 60000], heading: [0, 359], track: [0, 359],
+          verticalSpeed: [-6000, 6000], groundSpeed: [0, 600], gpsAltitude: [-1000, 60000],
+          distance: [0, 999], crossTrack: [-10, 10] };
+        for (const [key, value] of Object.entries(updates)) {
+          if (key === "waypoint" || key === "time") {
+            if (typeof value === "string") state[key] = value.slice(0, 12);
+          } else if (bounded[key] && Number.isFinite(Number(value))) {
+            state[key] = Math.min(bounded[key][1], Math.max(bounded[key][0], Number(value)));
+          }
+        }
+        draw();
+      };
+
+      window.addEventListener("resize", resize);
+      if ("ResizeObserver" in window) new ResizeObserver(resize).observe(canvas);
+      resize();
+    })();
+  </script>
+</body>
+</html>
